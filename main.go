@@ -1,8 +1,8 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -45,10 +45,23 @@ func main() {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
+	var body struct {
+		Items []struct {
+			Title string `json:"title"`
+			Price struct {
+				Amount string `json:"amount"`
+			} `json:"price"`
+		} `json:"items"`
+	}
+
+	// Parsea el `json:""`
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
 		panic(err)
 	}
 
-	fmt.Println(string(body))
+	for _, item := range body.Items {
+		fmt.Printf("Title: %s\n", item.Title)
+		fmt.Printf("Price: %s\n", item.Price.Amount)
+		fmt.Println()
+	}
 }
